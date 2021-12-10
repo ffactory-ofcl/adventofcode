@@ -547,20 +547,25 @@ object Year2021 {
       '}' -> '{'
       '>' -> '<'
       ')' -> '('
+
+      '[' -> ']'
+      '{' -> '}'
+      '<' -> '>'
+      '(' -> ')'
+
       else -> throw Exception()
     }
 
-    private val values = mapOf(
-      ')' to 3,
-      ']' to 57,
-      '}' to 1197,
-      '>' to 25137,
-    )
-
     fun part1() {
+      val values = mapOf(
+        ')' to 3,
+        ']' to 57,
+        '}' to 1197,
+        '>' to 25137,
+      )
 
-      val sum = lines
-          .map { line ->
+      val corruptChars = lines
+          .mapNotNull { line ->
             val stack = mutableListOf<Char>()
 
             line.toCharArray().firstOrNull { c ->
@@ -575,8 +580,39 @@ object Year2021 {
               return@firstOrNull false
             }
           }
-          .sumOf { values[it]!! }
+      val sum = corruptChars.sumOf { values[it]!! }
       println("Sum: $sum")
+    }
+
+    fun part2() {
+      val values = mapOf(
+        ')' to 1,
+        ']' to 2,
+        '}' to 3,
+        '>' to 4,
+      )
+
+      val missingCharsList = lines
+          .mapNotNull { line ->
+            val stack = mutableListOf<Char>()
+
+            val corrupt = line.toCharArray().firstOrNull { c ->
+              if (c in opening) {
+                stack.add(c)
+              } else {
+                when (stack.last()) {
+                  corresponding(c) -> stack.removeLast()
+                  else -> return@firstOrNull true
+                }
+              }
+              return@firstOrNull false
+            } != null
+            stack.takeIf { !corrupt && it.isNotEmpty() }
+          }
+      val scoresSorted = missingCharsList.map { chars ->
+        chars.reversed().fold(0L) { acc, it -> acc * 5 + values[corresponding(it)]!! }
+      }.sorted()
+      println("Winning: ${scoresSorted[scoresSorted.count() / 2]}")
     }
   }
 }

@@ -2,5 +2,5 @@
 
 
 fun main() {
-  Year2021.Day10.part1()
+  Year2021.Day10.part2()
 }
